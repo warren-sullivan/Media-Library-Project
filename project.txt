@@ -1,0 +1,4 @@
+A ratings database that allows users to submit and rate media
+1-5 stars, multiple media types (books, movies, ect)
+Recommendations based on what the user has liked/disliked, based on other user's scores
+An "other people liked" section for each media item

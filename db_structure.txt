@@ -1,0 +1,14 @@
+user {username, media_index, (recommended?)}
+
+media_index {media, media, media, ...}
+
+media {g_media, user_score}
+
+global_media_index {g_media, g_media, g_media, ...}
+
+g_media {title, genre, media_type, avg_score, (recommended?)}
+
+user recommended lists generated locally or on db? (only if I figure out async priority)
+book recommended lists generated server-side (maybe X at a time, if nobody looks deep in no reason to take up memory)
+
+add search function
