@@ -6,7 +6,7 @@ const globalMediaSchema = mongoose.Schema({
 	mediaType: String,
 	averageScore: Number,
 	ratingCount: Number
-	//reccomendations
+	//recommendations
 });
 
 module.exports = mongoose.model('GlobalMedia', globalMediaSchema);
