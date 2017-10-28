@@ -1,5 +1,10 @@
 const GlobalMedia = require('../models/globalMedia.model');
 
+module.exports = {
+	newMedia,
+	search
+};
+
 function newMedia(newMedia) {
 	const media = new GlobalMedia({
 		title: newMedia.title,

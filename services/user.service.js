@@ -1,5 +1,10 @@
 const User = require('../models/user.model');
 
+module.exports = {
+	newUser,
+	findUser
+};
+
 function newUser(newUser) {
 	const user = new User({
 		username: newUser.username,
