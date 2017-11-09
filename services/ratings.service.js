@@ -34,23 +34,26 @@ function rateMedia(user, globalMedia, rating) {
 function recHelper(searchRes, res) {
 	//bleh code, but it should work
 
+	//returns an array of media and how many users have that media in their own list
+	//TBD: average rating & rating of searched media
+
 	let recArray = [];
 
 	for(let i=0; i<res.length; i++) {
 		let found = false;
 
-		for(let j=0; j<i.mediaIndex.length; i++) {
-			if(i.mediaIndex[j] == searchRes) {
+		for(let j=0; j<res[i].mediaIndex.length; i++) {
+			if(res[i].mediaIndex[j] == searchRes) {
 				found = true;
 			}
 		}
 
 		if(found) {
-			for(let j=0; j<i.mediaIndex.length; i++) {
+			for(let j=0; j<res[i].mediaIndex.length; i++) {
 				let bool = true;
 
 				for(let k=0; k<recArray.length; i++) {
-					if(i.mediaIndex[j] == recArray[k].media) {
+					if(res[i].mediaIndex[j] == recArray[k].media) {
 						bool = false;
 						recArray[k].count++;
 					}
@@ -58,7 +61,7 @@ function recHelper(searchRes, res) {
 
 				if(bool) {
 					recArray.push({
-						media: i.mediaIndex[j],
+						media: res[i].mediaIndex[j],
 						count: 1
 					});
 				}
