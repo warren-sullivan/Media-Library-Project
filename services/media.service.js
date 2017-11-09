@@ -18,7 +18,7 @@ function newMedia(newMedia) {
 }
 
 function search(media) {
-	GlobalMedia.find({title: media.title, genre: media.genre, mediaType: media.mediaType}).exec().then((searchRes) => {
-		return searchRes[0];
-	});
+	//needs to not search for unavaliable input data
+
+	return GlobalMedia.find({title: media.title, genre: media.genre, mediaType: media.mediaType}).exec();
 }

@@ -17,14 +17,20 @@ app.get('/', (req, res) => {
 	res.send('root');
 });
 
-app.get('/user/username', (req, res) => {
-	let user = userService.findUser({username: 'username'});
-	res.status(200).json(user);
+app.get('/user', (req, res) => {
+	userService.findUser({username: req.query.name}).then((findRes) => {
+		res.status(200).json(findRes[0]);
+	}).catch((err) => {
+		res.status(500).json(err);
+	});
 });
 
-app.get('/mediaType/mediaTitle', (req, res) => {
-	let media = mediaService.search({title: 'mediaTitle', mediaType: 'mediaType'});
-	res.status(200).json(media);
+app.get('/media', (req, res) => {
+	mediaService.search({title: req.query.title, genre: req.query.genre, mediaType: req.query.type}).then((searchRes) => {
+		res.status(200).json(searchRes[0]);
+	}).catch((err) => {
+		res.status(500).json(err);
+	});
 });
 
 app.post('/user', (req, res) => {
@@ -32,22 +38,33 @@ app.post('/user', (req, res) => {
 		username: req.body.username
 	};
 
-	res.status(200).json(userService.newUser(user));
+	userService.newUser(user).then((newRes) => {
+		res.status(200).json(newRes);
+	}).catch((err) => {
+		res.status(500).json(err);
+	});
 });
 
-app.post('/mediaType', (req, res) => {
+app.post('/media', (req, res) => {
 	let media = {
 		title: req.body.title,
 		genre: req.body.genre,
-		mediaType: 'mediaType'
+		mediaType: req.body.mediaType
 	};
 
-	res.status(200).json(mediaService.newMedia(media));
+	mediaService.newMedia(media).then((newRes) => {
+		res.status(200).json(newRes);
+	}).catch((err) => {
+		res.status(500).json(err);
+	});
 });
 
 app.post('/search', (req, res) => {
-	let media = mediaService.search({title: req.body.title, genre: req.body.genre, mediaType: req.body.mediaType});
-	res.status(200).json(media);
+	mediaService.search({title: req.body.title, genre: req.body.genre, mediaType: req.body.mediaType}).then((searchRes) => {
+		res.status(200).json(searchRes[0]);
+	}).catch((err) => {
+		res.status(500).json(err);
+	});
 });
 
 app.listen(PORT, () => { console.log('server start'); });

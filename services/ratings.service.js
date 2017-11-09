@@ -32,6 +32,8 @@ function rateMedia(user, globalMedia, rating) {
 }
 
 function recHelper(searchRes, res) {
+	//bleh code, but it should work
+
 	let recArray = [];
 
 	for(let i=0; i<res.length; i++) {

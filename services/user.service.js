@@ -14,7 +14,5 @@ function newUser(newUser) {
 }
 
 function findUser(user) {
-	User.find({username: user.username}).exec().then((searchRes) => {
-		return searchRes[0];
-	});
+	return User.find({username: user.username}).exec();
 }
