@@ -3,7 +3,19 @@ const media = require('../services/media.service');
 const expect = chai.expect;
 
 describe('Media Service', () => {
-	it('should return a promise', () => {
-		expect(users).to.be.a('promise');
+	it('newMedia() should return a promise', () => {
+
+	});
+
+	it('newMedia() promise should return a media object', () => {
+
+	});
+
+	it('search() should return a promise', () => {
+
+	});
+
+	it('search() promise should return a media object', () => {
+
 	});
 });
