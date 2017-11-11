@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const mongodb = require('./mongodb.utils');
 const userService = require('./services/user.service');
 const mediaService = require('./services/media.service');
+const errMiddleware = require('./err-middleware');
 
 const app = express();
 app.use(bodyParser.json());
@@ -67,6 +68,7 @@ app.post('/search', (req, res) => {
 	});
 });
 
+app.use(errMiddleware);
 app.listen(PORT, () => { console.log('server start'); });
 
 module.exports = app;
