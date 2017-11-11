@@ -20,6 +20,9 @@ describe('Media Service', () => {
 			expect(res.mediaType).to.equal('Test');
 			expect(res.averageScore).to.equal(0);
 			expect(res.ratingCount).to.equal(0);
+			done();
+		}).catch((err) => {
+			return err;
 		});
 	});
 
@@ -28,12 +31,28 @@ describe('Media Service', () => {
 	});
 
 	it('search() promise should return a media object', () => {
-		media.newMedia(dummyMedia).then((res) => {
+		media.search(dummyMedia).then((res) => {
 			expect(res.title).to.equal('Test Media');
 			expect(res.genre).to.equal('Testing');
 			expect(res.mediaType).to.equal('Test');
 			expect(res.averageScore).to.equal(0);
 			expect(res.ratingCount).to.equal(0);
+			done();
+		}).catch((err) => {
+			return err;
+		});
+	});
+
+	it('search() promise should return a media object with only title', () => {
+		media.search({title: 'Test Media'}).then((res) => {
+			expect(res.title).to.equal('Test Media');
+			expect(res.genre).to.equal('Testing');
+			expect(res.mediaType).to.equal('Test');
+			expect(res.averageScore).to.equal(0);
+			expect(res.ratingCount).to.equal(0);
+			done();
+		}).catch((err) => {
+			return err;
 		});
 	});
 });

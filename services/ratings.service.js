@@ -11,7 +11,7 @@ module.exports = {
 };
 
 function rateMedia(user, globalMedia, rating) {
-	GlobalMedia.find({title: globalMedia.title, genre: globalMedia.genre, mediaType: globalMedia.mediaType}).exec().then((searchRes) => {
+	return GlobalMedia.find({title: globalMedia.title, genre: globalMedia.genre, mediaType: globalMedia.mediaType}).exec().then((searchRes) => {
 		let gMedia = searchRes[0];
 
 		gMedia.averageScore = (gMedia.averageScore * gMedia.ratingCount + rating) / (gMedia.ratingCount + 1);
@@ -26,7 +26,7 @@ function rateMedia(user, globalMedia, rating) {
 
 		return media.save();
 	}).then((mediaRes) => {
-		user.mediaIndex.push(mediaRes);
+		user.mediaIndex.push(mediaRes._id);
 		return user.save();
 	});
 }
@@ -75,7 +75,7 @@ function getMediaRec(media) {
 	//grab and return rec list for X media
 	mediaService.search(media).then((searchRes) => {
 		User.find({}).exec().then((res) => {
-			recHelper(searchRes, res);
+			recHelper(searchRes[0], res);
 			//do something with this array
 		});
 	});

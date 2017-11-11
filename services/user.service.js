@@ -6,6 +6,8 @@ module.exports = {
 };
 
 function newUser(newUser) {
+	//TBD: block duplicate usernames
+
 	const user = new User({
 		username: newUser.username,
 	});

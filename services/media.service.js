@@ -6,6 +6,8 @@ module.exports = {
 };
 
 function newMedia(newMedia) {
+	//TBD: block duplicate media
+
 	const media = new GlobalMedia({
 		title: newMedia.title,
 		genre: newMedia.genre,
@@ -18,7 +20,11 @@ function newMedia(newMedia) {
 }
 
 function search(media) {
-	//needs to not search for unavaliable input data
+	let temp = {};
+	if(media._id){temp._id = media._id}
+	if(media.title){temp.title = media.title}
+	if(media.genre){temp.genre = media.genre}
+	if(media.mediaType){temp.mediaType = media.mediaType}
 
-	return GlobalMedia.find({title: media.title, genre: media.genre, mediaType: media.mediaType}).exec();
+	return GlobalMedia.find(temp).exec();
 }

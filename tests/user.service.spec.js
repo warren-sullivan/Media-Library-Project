@@ -14,6 +14,8 @@ describe('User Service', () => {
 	it('newUser() promise should return a user object', () => {
 		user.newUser(dummyUser).then((res) => {
 			expect(res.username).to.equal('Test');
+		}).catch((err) => {
+			return err;
 		});
 	});
 
@@ -24,6 +26,8 @@ describe('User Service', () => {
 	it('findUser() promise should return a user object', () => {
 		user.findUser(dummyUser).then((res) => {
 			expect(res.username).to.equal('Test');
+		}).catch((err) => {
+			return err;
 		});
 	});
 });
