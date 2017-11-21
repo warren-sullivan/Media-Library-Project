@@ -6,15 +6,21 @@ module.exports = {
 };
 
 function newUser(newUser) {
-	//TBD: block duplicate usernames
+	return findUser(newUser).then((res) => {
+		if(res.length > 0) { throw new Error('user already exists'); }
+		else {
+			const user = new User({
+				username: newUser.username,
+			});
 
-	const user = new User({
-		username: newUser.username,
+			return user.save();
+		}
+	}).catch((err) => {
+		throw err;
 	});
-
-	return user.save();
 }
 
 function findUser(user) {
+	if(!user.username) { throw new Error('invalid username'); }
 	return User.find({username: user.username}).exec();
 }

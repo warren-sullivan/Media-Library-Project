@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 const User = require('../models/user.model');
 const Media = require('../models/media.model');
 const GlobalMedia = require('../models/globalMedia.model');
@@ -32,42 +34,43 @@ function rateMedia(user, globalMedia, rating) {
 }
 
 function recHelper(searchRes, res) {
-	//bleh code, but it should work
-
 	//returns an array of media and how many users have that media in their own list
 	//TBD: average rating & rating of searched media
 
 	let recArray = [];
 
-	for(let i=0; i<res.length; i++) {
+	_.forEach(res, (obj) => {
 		let found = false;
 
-		for(let j=0; j<res[i].mediaIndex.length; i++) {
-			if(res[i].mediaIndex[j] == searchRes) {
-				found = true;
-			}
-		}
+		_.forEach(obj.mediaIndex, (media) => {
+			if(media == searchRes) { found = true; }
+		});
 
 		if(found) {
-			for(let j=0; j<res[i].mediaIndex.length; i++) {
+			_.forEach(obj.mediaIndex, (media) => {
 				let bool = true;
 
-				for(let k=0; k<recArray.length; i++) {
-					if(res[i].mediaIndex[j] == recArray[k].media) {
+				_.forEach(recArray, (rec) => {
+					if(media == rec.media) {
 						bool = false;
-						recArray[k].count++;
+						rec.count++;
+						rec.averageScore = (rec.averageScore + media.averageScore) \ (rec.ratingCount + 1);
+						rec.ratingCount++;
 					}
-				}
+				});
 
 				if(bool) {
 					recArray.push({
-						media: res[i].mediaIndex[j],
-						count: 1
+						media: media,
+						count: 1,
+						averageScore: media.averageScore,
+						ratingCount: media.ratingCount
 					});
 				}
-			}
+			});
 		}
-	}
+	});
+
 	return recArray;
 }
 

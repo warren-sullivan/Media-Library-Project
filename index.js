@@ -20,17 +20,20 @@ app.get('/', (req, res) => {
 
 app.get('/user', (req, res) => {
 	userService.findUser({username: req.query.name}).then((findRes) => {
-		res.status(200).json(findRes[0]);
+		if(findRes.length < 1) { throw new Error('user not found'); }
+		else { res.status(200).json(findRes[0]); }
 	}).catch((err) => {
-		res.status(500).json(err);
+		console.log('path')
+		res.status(500).send(err.toString());
 	});
 });
 
 app.get('/media', (req, res) => {
 	mediaService.search({title: req.query.title, genre: req.query.genre, mediaType: req.query.type}).then((searchRes) => {
-		res.status(200).json(searchRes[0]);
+		if(searchRes.length < 1) { throw new Error('media not found'); }
+		else { res.status(200).json(searchRes[0]); }
 	}).catch((err) => {
-		res.status(500).json(err);
+		res.status(500).send(err.toString());
 	});
 });
 
@@ -42,7 +45,7 @@ app.post('/user', (req, res) => {
 	userService.newUser(user).then((newRes) => {
 		res.status(200).json(newRes);
 	}).catch((err) => {
-		res.status(500).json(err);
+		res.status(500).send(err.toString());
 	});
 });
 
@@ -56,15 +59,16 @@ app.post('/media', (req, res) => {
 	mediaService.newMedia(media).then((newRes) => {
 		res.status(200).json(newRes);
 	}).catch((err) => {
-		res.status(500).json(err);
+		res.status(500).send(err.toString());
 	});
 });
 
 app.post('/search', (req, res) => {
 	mediaService.search({title: req.body.title, genre: req.body.genre, mediaType: req.body.mediaType}).then((searchRes) => {
-		res.status(200).json(searchRes[0]);
+		if(searchRes.length < 1) { throw new Error('media not found'); }
+		else { res.status(200).json(searchRes); }
 	}).catch((err) => {
-		res.status(500).json(err);
+		res.status(500).send(err.toString());
 	});
 });
 
