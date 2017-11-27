@@ -23,7 +23,6 @@ app.get('/user', (req, res) => {
 		if(findRes.length < 1) { throw new Error('user not found'); }
 		else { res.status(200).json(findRes[0]); }
 	}).catch((err) => {
-		console.log('path')
 		res.status(500).send(err.toString());
 	});
 });

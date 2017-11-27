@@ -5,6 +5,7 @@ const Media = require('../models/media.model');
 const GlobalMedia = require('../models/globalMedia.model');
 
 const mediaService = require('./media.service');
+const userService = require('./user.service');
 
 module.exports = {
 	rateMedia,
@@ -35,7 +36,6 @@ function rateMedia(user, globalMedia, rating) {
 
 function recHelper(searchRes, res) {
 	//returns an array of media and how many users have that media in their own list
-	//TBD: average rating & rating of searched media
 
 	let recArray = [];
 
@@ -54,7 +54,7 @@ function recHelper(searchRes, res) {
 					if(media == rec.media) {
 						bool = false;
 						rec.count++;
-						rec.averageScore = (rec.averageScore + media.averageScore) \ (rec.ratingCount + 1);
+						rec.averageScore = (rec.averageScore + media.averageScore) / (rec.ratingCount + 1);
 						rec.ratingCount++;
 					}
 				});
@@ -75,15 +75,37 @@ function recHelper(searchRes, res) {
 }
 
 function getMediaRec(media) {
-	//grab and return rec list for X media
 	mediaService.search(media).then((searchRes) => {
 		User.find({}).exec().then((res) => {
-			recHelper(searchRes[0], res);
-			//do something with this array
+			return recHelper(searchRes[0], res);
 		});
 	});
 }
 
-function generateRecList() {
+function userRecHelper(user, userList) {
+	let array = [];
+
+	_.forEach(user.mediaIndex, (userMedia) => {
+		_.forEach(userList, (listIndex) => {
+			_.forEach(listIndex, (listMedia) => {
+				if(userMedia == listMedia) {
+					array.push({
+						
+					});
+				}
+			});
+		});
+	});
+
+	return array;
+}
+
+function generateRecList(user) {
+	userService.findUser(user).then((userRes) => {
+		User.find({}).exec().then((res) => {
+			return userRecHelper(userRes, res);
+		});
+	});
+	
 	//create a list of recs based on user and other users
 }
