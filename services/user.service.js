@@ -11,6 +11,7 @@ function newUser(newUser) {
 		else {
 			const user = new User({
 				username: newUser.username,
+				mediaIndex : []
 			});
 
 			return user.save();

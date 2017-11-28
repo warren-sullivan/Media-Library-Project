@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 function connect() {
-	const uri = 'mongodb://localhost/project';
+	const uri = 'mongodb://localhost/project_beta';
 	mongoose.connect(uri, {useMongoClient:true});
 }
 
