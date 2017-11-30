@@ -13,35 +13,81 @@ module.exports = {
 	getUserRec
 };
 
-function rateMedia(user, globalMedia, rating) {
-	//multiple ratings should just change score, not add another entry
+function rateMedia(user, media, rating) {
+	let tempObj = {};
+	let mediaID;
+	let alreadyRated = false;
+	let oldRating;
 
-	//should be able to attempt handling missing genre/type
-	//more error handling in general
-	let media;
-	return GlobalMedia.find({title: globalMedia.title, genre: globalMedia.genre, mediaType: globalMedia.mediaType}).exec().then((searchRes) => {
+	if(media._id) { tempObj._id = media._id; }
+	if(media.title) { tempObj.title = media.title; }
+	if(media.genre) { tempObj.genre = media.genre; }
+	if(media.mediaType) { tempObj.mediaType = media.mediaType; }
+
+
+	return userService.findUser(user).then((userRes) => {
+		user = userRes[0];
+	}).then(() => {
+		return mediaService.search(tempObj);
+	}).then((searchRes) => {
 		let gMedia = searchRes[0];
-		//error handling if no media is found
+		mediaID = gMedia._id;
 
-		gMedia.averageScore = (gMedia.averageScore * gMedia.ratingCount + rating) / (gMedia.ratingCount + 1);
-		gMedia.ratingCount++;
+		//better error handling needed
+		if(!gMedia) { throw new Error('invalid media'); }
+		if(!user) { throw new Error('invalid user'); }
+		if(!rating) { throw new Error('invalid rating'); }
 
-		return GlobalMedia.findOneAndUpdate(searchRes[0]._id, gMedia);
-	}).then((rateRes) => {
-		const media = new Media({
-			userScore: rating,
-			media: rateRes._id
+		_.forEach(user.mediaIndex, (userMedia) => {
+			if(userMedia.media.toString() == mediaID.toString()) {
+				alreadyRated = true;
+				oldRating = userMedia.userScore;
+			}
 		});
 
-		return media.save();
-	}).then((mediaRes) => {
-		media = mediaRes;
-		return userService.findUser(user);
-	}).then((userRes) => {
-		userRes[0].mediaIndex.push(media._id);
-		return userRes[0].save();
+		if(alreadyRated) {
+			let tempNum = gMedia.averageScore * gMedia.ratingCount - oldRating;
+			gMedia.averageScore = (tempNum + rating) / gMedia.ratingCount;
+			return GlobalMedia.findOneAndUpdate({_id: gMedia._id}, gMedia);
+		} else {
+			gMedia.averageScore = (gMedia.averageScore * gMedia.ratingCount + rating) / (gMedia.ratingCount + 1);
+			gMedia.ratingCount++;
+			return GlobalMedia.findOneAndUpdate({_id: gMedia._id}, gMedia);
+		}
+	}).then((rateRes) => {
+		if(alreadyRated) {
+			let id;
+			let mediaToUpdate;
+
+			_.forEach(user.mediaIndex, (userMedia) => {
+				if(userMedia.media.toString() == mediaID.toString()) {
+					userMedia.userScore = rating;
+
+					id = {_id: userMedia._id}
+					mediaToUpdate = userMedia;
+				}
+			});
+
+			return Media.findOneAndUpdate(id, mediaToUpdate).then((output) => {
+				console.log(output)
+				//returns null?
+				return user.save();
+			});
+		} else {
+			const newMedia = new Media({
+				userScore: rating,
+				media: mediaID
+			});
+
+			user.mediaIndex.push(newMedia);
+			return user.save();
+		}
+	}).catch((err) => {
+		throw err;
 	});
 }
+
+
 
 function recHelper(searchRes, res) {
 	let recArray = [];
@@ -91,6 +137,8 @@ function getMediaRec(media) {
 	});
 }
 
+
+
 function userRecHelper(user, userList, mediaList) {
 	user = user[0];
 	let sharedArray = [];
@@ -118,34 +166,24 @@ function userRecHelper(user, userList, mediaList) {
 	_.forEach(mediaList, (media) => {
 		_.forEach(user.mediaIndex, (id) => {
 			//might be broken somewhere else, this should be fine
-			console.log(media._id)
-			console.log(id)
-			console.log()
 			if(media._id.toString() == id.toString()) {
 				newMediaList.push({media: media, score: 0});
 			}
 		})
 	});
 
-	console.log(newMediaList)
-
-	// let newMediaList = _.without(mediaList, user.mediaIndex);
-	// newMediaList = _.map(newMediaList, (media) => {
-	// 	return {media: media, score: 0}
-	// });
-
 	_.forEach(userList, (otherUser) => {
+		let sharedCount = 0;
 		_.forEach(sharedArray, (item) => {
 			if(item.user == otherUser.username) {
-				let shared = item;
+				sharedCount = item.count;
 			}
 		});
 
 		_.forEach(otherUser.mediaIndex, (otherMedia) => {
 			_.forEach(newMediaList, (obj) => {
-				if(otherMedia.media == obj.media) {
-					console.log('hit')
-					obj.score += shared.count;
+				if(otherMedia.toString() == obj.media._id.toString()) {
+					obj.score += sharedCount;
 				}
 			});
 		});
