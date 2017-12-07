@@ -1,3 +1,5 @@
+//no longer needed?
+
 const mongoose = require('mongoose');
 
 const mediaIndexSchema = mongoose.Schema({

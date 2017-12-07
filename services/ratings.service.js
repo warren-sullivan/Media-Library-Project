@@ -46,8 +46,10 @@ function rateMedia(user, media, rating) {
 		});
 
 		if(alreadyRated) {
-			let tempNum = gMedia.averageScore * gMedia.ratingCount - oldRating;
+			let tempNum = (gMedia.averageScore * gMedia.ratingCount) - oldRating;
 			gMedia.averageScore = (tempNum + rating) / gMedia.ratingCount;
+			console.log({_id: gMedia._id})
+			console.log(gMedia)
 			return GlobalMedia.findOneAndUpdate({_id: gMedia._id}, gMedia);
 		} else {
 			gMedia.averageScore = (gMedia.averageScore * gMedia.ratingCount + rating) / (gMedia.ratingCount + 1);
@@ -63,14 +65,12 @@ function rateMedia(user, media, rating) {
 				if(userMedia.media.toString() == mediaID.toString()) {
 					userMedia.userScore = rating;
 
-					id = {_id: userMedia._id}
+					id = {_id: userMedia._id};
 					mediaToUpdate = userMedia;
 				}
 			});
 
 			return Media.findOneAndUpdate(id, mediaToUpdate).then((output) => {
-				console.log(output)
-				//returns null?
 				return user.save();
 			});
 		} else {
@@ -79,7 +79,12 @@ function rateMedia(user, media, rating) {
 				media: mediaID
 			});
 
+			//BROKEN
+			//Media and User not linked, fix this
+			//will probably need to refactor
+
 			user.mediaIndex.push(newMedia);
+			newMedia.save();
 			return user.save();
 		}
 	}).catch((err) => {
