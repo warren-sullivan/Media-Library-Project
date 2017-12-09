@@ -26,15 +26,22 @@ app.get('/', (req, res) => {
 //for debugging
 const User = require('./models/user.model');
 const GlobalMedia = require('./models/globalMedia.model');
+const Media = require('./models/media.model');
 
 app.get('/user_list', (req, res) => {
-	User.find({}).exec().then((findRes) => {
+	User.find({}).populate('mediaIndex').exec().then((findRes) => {
 		res.status(200).json(findRes);
 	});
 });
 
 app.get('/media_list', (req, res) => {
 	GlobalMedia.find({}).exec().then((findRes) => {
+		res.status(200).json(findRes);
+	});
+});
+
+app.get('/media2_list', (req, res) => {
+	Media.find({}).exec().then((findRes) => {
 		res.status(200).json(findRes);
 	});
 });

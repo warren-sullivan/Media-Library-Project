@@ -23,5 +23,5 @@ function newUser(newUser) {
 
 function findUser(user) {
 	if(!user.username) { throw new Error('invalid username'); }
-	return User.find({username: user.username}).exec();
+	return User.find({username: user.username}).populate('mediaIndex').exec();
 }

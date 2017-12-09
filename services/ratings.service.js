@@ -24,7 +24,6 @@ function rateMedia(user, media, rating) {
 	if(media.genre) { tempObj.genre = media.genre; }
 	if(media.mediaType) { tempObj.mediaType = media.mediaType; }
 
-
 	return userService.findUser(user).then((userRes) => {
 		user = userRes[0];
 	}).then(() => {
@@ -48,13 +47,11 @@ function rateMedia(user, media, rating) {
 		if(alreadyRated) {
 			let tempNum = (gMedia.averageScore * gMedia.ratingCount) - oldRating;
 			gMedia.averageScore = (tempNum + rating) / gMedia.ratingCount;
-			console.log({_id: gMedia._id})
-			console.log(gMedia)
-			return GlobalMedia.findOneAndUpdate({_id: gMedia._id}, gMedia);
+			return GlobalMedia.findOneAndUpdate({_id: gMedia._id}, gMedia, {new: true});
 		} else {
 			gMedia.averageScore = (gMedia.averageScore * gMedia.ratingCount + rating) / (gMedia.ratingCount + 1);
 			gMedia.ratingCount++;
-			return GlobalMedia.findOneAndUpdate({_id: gMedia._id}, gMedia);
+			return GlobalMedia.findOneAndUpdate({_id: gMedia._id}, gMedia, {new: true});
 		}
 	}).then((rateRes) => {
 		if(alreadyRated) {
@@ -70,8 +67,17 @@ function rateMedia(user, media, rating) {
 				}
 			});
 
-			return Media.findOneAndUpdate(id, mediaToUpdate).then((output) => {
-				return user.save();
+			//using mediaToUpdate in Media.findOneAndUpdate fails silently
+			//lodash says they aren't equal, == and === on values and length is all true
+			//I don't even know anymore, have a hack
+			let mediaHACK = {_id: mediaToUpdate._id,
+				userScore: mediaToUpdate.userScore,
+				media: mediaToUpdate.media,
+				__v: mediaToUpdate.__v}
+
+			return Media.findOneAndUpdate(id, mediaHACK, {new: true}).then((output) => {
+				console.log(output)
+				return output
 			});
 		} else {
 			const newMedia = new Media({
@@ -79,13 +85,10 @@ function rateMedia(user, media, rating) {
 				media: mediaID
 			});
 
-			//BROKEN
-			//Media and User not linked, fix this
-			//will probably need to refactor
-
 			user.mediaIndex.push(newMedia);
 			newMedia.save();
-			return user.save();
+			user.save();
+			return user;
 		}
 	}).catch((err) => {
 		throw err;
