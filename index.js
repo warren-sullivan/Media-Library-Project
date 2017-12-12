@@ -2,32 +2,28 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const mongodb = require('./mongodb.utils');
+const errMiddleware = require('./err-middleware');
+
 const userService = require('./services/user.service');
 const mediaService = require('./services/media.service');
 const ratingsService = require('./services/ratings.service');
-const errMiddleware = require('./err-middleware');
 
-const app = express();
-app.use(bodyParser.json());
-
-const PORT = 3000;
-
-mongodb.createEventListeners();
-mongodb.connect();
-
-app.get('/', (req, res) => {
-	//remember to change the names when testing
-	//ratingsService.getMediaRec();
-	ratingsService.getUserRec({username: 'Jane'});
-	res.send('root');
-});
-
+const mediaRecList = require('./services/mediaRecList.service');
 
 //for debugging
 const User = require('./models/user.model');
 const GlobalMedia = require('./models/globalMedia.model');
 const Media = require('./models/media.model');
+//for debugging
 
+const PORT = 3000;
+const app = express();
+app.use(bodyParser.json());
+
+mongodb.createEventListeners();
+mongodb.connect();
+
+//for debugging
 app.get('/user_list', (req, res) => {
 	User.find({}).populate('mediaIndex').exec().then((findRes) => {
 		res.status(200).json(findRes);
@@ -47,6 +43,14 @@ app.get('/media2_list', (req, res) => {
 });
 //for debugging
 
+app.get('/', (req, res) => {
+	// remember to change the names when testing
+
+	mediaRecList.getMediaRec({title: 'Funny Story'});
+	//userRecList.getUserRec({username: 'John'})
+
+	res.send('root');
+});
 
 app.get('/user', (req, res) => {
 	userService.findUser({username: req.query.name}).then((findRes) => {

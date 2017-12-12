@@ -2,7 +2,8 @@ const User = require('../models/user.model');
 
 module.exports = {
 	newUser,
-	findUser
+	findUser,
+	findAllUsers
 };
 
 function newUser(newUser) {
@@ -24,4 +25,8 @@ function newUser(newUser) {
 function findUser(user) {
 	if(!user.username) { throw new Error('invalid username'); }
 	return User.find({username: user.username}).populate('mediaIndex').exec();
+}
+
+function findAllUsers() {
+	return User.find({}).populate('mediaIndex').exec();
 }

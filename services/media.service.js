@@ -2,7 +2,8 @@ const GlobalMedia = require('../models/globalMedia.model');
 
 module.exports = {
 	newMedia,
-	search
+	search,
+	findMediaID
 };
 
 function newMedia(newMedia) {
@@ -35,4 +36,8 @@ function search(media) {
 	if(!media || !bool) { throw new Error('invalid media'); }
 
 	return GlobalMedia.find(temp).exec();
+}
+
+function findMediaID(id) {
+	return GlobalMedia.find({_id: id}).exec();
 }
