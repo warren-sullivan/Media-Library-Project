@@ -24,8 +24,10 @@ function userRecHelper(user, userList, mediaList) {
 
 			_.forEach(otherUser.mediaIndex, (otherMedia) => {
 				_.forEach(user.mediaIndex, (userMedia) => {
-					if(userMedia.media == otherMedia.media) {
-						shared.count++;
+					if(userMedia.media.toString() == otherMedia.media.toString()) {
+						if(Math.abs(userMedia.userScore-otherMedia.userScore) <= 1) {
+							shared.count++;
+						}
 					}
 				});
 			});
@@ -34,48 +36,68 @@ function userRecHelper(user, userList, mediaList) {
 		}
 	});
 
-	let newMediaList = [];
-	_.forEach(mediaList, (media) => {
-		_.forEach(user.mediaIndex, (id) => {
-			//might be broken somewhere else, this should be fine
-			if(media._id.toString() == id.toString()) {
-				newMediaList.push({media: media, score: 0});
-			}
-		})
+	let promiseArray = [];
+	_.forEach(sharedArray, (shared) => {
+		promiseArray.push(userService.findUser({username: shared.user}));
 	});
 
-	_.forEach(userList, (otherUser) => {
-		let sharedCount = 0;
-		_.forEach(sharedArray, (item) => {
-			if(item.user == otherUser.username) {
-				sharedCount = item.count;
-			}
+	return Promise.all(promiseArray).then((res) => {
+		let mediaArray = [];
+		_.forEach(res, (users) => {
+			mediaArray.push({
+				user: users[0].username,
+				media: users[0].mediaIndex,
+				score: undefined
+			})
 		});
 
-		_.forEach(otherUser.mediaIndex, (otherMedia) => {
-			_.forEach(newMediaList, (obj) => {
-				if(otherMedia.toString() == obj.media._id.toString()) {
-					obj.score += sharedCount;
+		_.forEach(mediaArray, (media) => {
+			_.forEach(sharedArray, (shared) => {
+				if(media.user == shared.user) {
+					media.score = shared.count;
 				}
 			});
 		});
-	});
 
-	return newMediaList;
+		let resultArray = [];
+		_.forEach(mediaArray, (mediaIndex) => {
+			_.forEach(mediaIndex.media, (media) => {
+				let bool = true;
+				_.forEach(resultArray, (result) => {
+					if(result.id.toString() == media.media.toString()) {
+						bool = false;
+						if(media.userScore >= 4) {
+							result.score = result.score + mediaIndex.score;
+						}
+					}
+				});
+
+				if(bool) {
+					if(media.userScore >= 4) {
+						resultArray.push({
+							id: media.media,
+							score: mediaIndex.score
+						});
+					} else {
+						resultArray.push({
+							id: media.media,
+							score: 0
+						});
+					}
+				}
+			});
+		});
+
+		return resultArray;
+	});
 }
 
 function getUserRec(user) {
-	//needs to return promise
-	userService.findUser(user).then((userRes) => {
-		User.find({}).exec().then((res) => {
-			GlobalMedia.find({}).exec().then((media) => {
-				console.log(userRes)
-				console.log()
-				console.log(res)
-				console.log()
-				console.log(media)
-				console.log()
-				console.log(userRecHelper(userRes, res, media));
+	return userService.findUser(user).then((userRes) => {
+		return userService.findAllUsers().then((res) => {
+			return GlobalMedia.find({}).exec().then((media) => {
+				//TBD: sort and return top 10
+				return userRecHelper(userRes, res, media);
 			});
 		});
 	}).catch((err) => {

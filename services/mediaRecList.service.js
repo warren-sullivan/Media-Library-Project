@@ -11,6 +11,9 @@ module.exports = {
 	getMediaRec
 };
 
+// There's a better way to do this, but get it working now and fix it later.
+// Warning: terrible code below
+
 function newRatingObj(mediaObj) {
 	return mediaService.findMediaID(mediaObj.media).then((res) => {
 		return {
@@ -42,10 +45,10 @@ function newRecs(obj) {
 	return Promise.all(promiseArray);
 }
 
-function recHelper(searchRes, userRes) {
+function recHelper(searchRes, allUserRes) {
 	let promiseArray = [];
 
-	_.forEach(userRes, (obj) => {
+	_.forEach(allUserRes, (obj) => {
 		let found = false;
 
 		_.forEach(obj.mediaIndex, (mediaObj) => {
@@ -59,7 +62,8 @@ function recHelper(searchRes, userRes) {
 
 	return Promise.all(promiseArray).then((res) => {
 		let recArray = [];
-		res = _.unionBy(res, 'media');
+
+		res = _.uniqWith(_.flattenDeep(res), _.isEqual)
 
 		_.forEach(res, (recObj) => {
 			recArray.push(recObj);
@@ -69,71 +73,69 @@ function recHelper(searchRes, userRes) {
 	});
 }
 
-function getMediaRec(media) {
-	//needs to return promise
-	return mediaService.search(media).then((searchRes) => {
-		return userService.findAllUsers().then((userRes) => {
-			// TBD: sort and return 10 media with highest ratings
-			//console.log(recHelper(searchRes[0], userRes));
-			recHelper(searchRes[0], userRes).then((res) => {
-				console.log(res)
-			})
-			return 'blah';
+function recCounter(searchRes, allUserRes) {
+	return recHelper(searchRes, allUserRes).then((res) => {
+		let recArray = [];
+
+		_.forEach(allUserRes, (obj) => {
+			let found = false;
+
+			_.forEach(obj.mediaIndex, (mediaObj) => {
+				if(mediaObj.media.toString() == searchRes._id.toString()) { found = true; }
+			});
+
+			if(found) {
+				_.forEach(obj.mediaIndex, (mediaObj) => {
+					_.forEach(res, (rec) => {
+						if(mediaObj.media.toString() == rec.media.toString()) {
+							let bool = true;
+							let scoreWeighted;
+							if(mediaObj.userScore == 5) {
+								scoreWeighted = 8;
+							} else if(mediaObj.userScore == 4) {
+								scoreWeighted = 5;
+							} else if(mediaObj.userScore == 3) {
+								scoreWeighted = 3;
+							} else if(mediaObj.userScore == 2) {
+								scoreWeighted = 1;
+							} else if(mediaObj.userScore == 1) {
+								scoreWeighted = 0;
+							}
+
+							_.forEach(recArray, (recObj) => {
+								if(recObj.id.toString() == mediaObj.media.toString()) {
+									bool = false;
+									recObj.averageRecScore = (recObj.averageRecScore * recObj.ratingRecCount + scoreWeighted) / (recObj.ratingRecCount + 1);
+									recObj.ratingRecCount++;
+								}
+							});
+
+							//TBD: add weighted score
+
+							if(bool) {
+								recArray.push({
+									id: mediaObj.media,
+									averageRecScore: scoreWeighted,
+									ratingRecCount: 1
+								})
+							}
+						}
+					});
+				});
+			}
 		});
+
+		return recArray;
 	});
 }
 
-// function recHelper(searchRes, userRes) {
-// 	let recArray = [];
-//
-// 	_.forEach(userRes, (obj) => {
-// 		let found = false;
-//
-// 		_.forEach(obj.mediaIndex, (mediaObj) => {
-// 			if(mediaObj.media.toString() == searchRes._id.toString()) { found = true; }
-// 		});
-//
-// 		if(found) {
-// 			_.forEach(obj.mediaIndex, (mediaObj) => {
-// 				let bool = true;
-//
-// 				_.forEach(recArray, (rec) => {
-// 					if(mediaObj.media.toString() == rec.media.toString()) {
-// 						console.log('hit ++')
-// 						bool = false;
-// 						rec.count++;
-// 						rec.averageScore = (rec.averageScore + mediaObj.averageScore) / (rec.ratingCount + 1);
-// 						rec.ratingCount++;
-// 					}
-// 				});
-//
-// 				if(bool) {
-// 					console.log('hit new')
-// 					recArray.push({
-// 						media: mediaObj.media,
-// 						count: 1,
-// 						averageScore: mediaObj.averageScore,
-// 						ratingCount: mediaObj.ratingCount
-// 					});
-//
-// 					// newRatingObj(mediaObj).then((res) => {
-// 					// 	recArray.push(res);
-// 					// })
-// 				}
-// 			});
-// 		}
-// 	});
-//
-// 	return recArray;
-// }
-//
-// function getMediaRec(media) {
-// 	//needs to return promise
-// 	return mediaService.search(media).then((searchRes) => {
-// 		return userService.findAllUsers().then((userRes) => {
-// 			// TBD: sort and return 10 media with highest ratings
-// 			console.log(recHelper(searchRes[0], userRes));
-// 			return 'blah';
-// 		});
-// 	});
-// }
+function getMediaRec(media) {
+	return mediaService.search(media).then((searchRes) => {
+		return userService.findAllUsers().then((allUserRes) => {
+			// TBD: sort and return 10 media with highest ratings
+			return recCounter(searchRes[0], allUserRes).then((res) => {
+				return res;
+			});
+		});
+	});
+}

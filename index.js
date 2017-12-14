@@ -9,6 +9,7 @@ const mediaService = require('./services/media.service');
 const ratingsService = require('./services/ratings.service');
 
 const mediaRecList = require('./services/mediaRecList.service');
+const userRecList = require('./services/userRecList.service');
 
 //for debugging
 const User = require('./models/user.model');
@@ -35,21 +36,16 @@ app.get('/media_list', (req, res) => {
 		res.status(200).json(findRes);
 	});
 });
-
-app.get('/media2_list', (req, res) => {
-	Media.find({}).exec().then((findRes) => {
-		res.status(200).json(findRes);
-	});
-});
 //for debugging
 
 app.get('/', (req, res) => {
-	// remember to change the names when testing
+	mediaRecList.getMediaRec({title: 'Funny Movie'}).then((rec) => {
+		res.send(rec);
+	})
 
-	mediaRecList.getMediaRec({title: 'Funny Story'});
-	//userRecList.getUserRec({username: 'John'})
-
-	res.send('root');
+	// userRecList.getUserRec({username: 'John'}).then((rec) => {
+	// 	res.send(rec);
+	// })
 });
 
 app.get('/user', (req, res) => {
@@ -106,12 +102,15 @@ app.post('/search', (req, res) => {
 });
 
 app.post('/rate', (req, res) => {
-	//user and media are objects
 	ratingsService.rateMedia(req.body.user, req.body.media, req.body.rating).then((rateRes) => {
 		res.status(200).json(rateRes);
 	}).catch((err) => {
 		res.status(500).send(err.toString());
 	});
+});
+
+app.get('/updateRecommendations', (req, res) => {
+	//TBD
 });
 
 app.use(errMiddleware);
