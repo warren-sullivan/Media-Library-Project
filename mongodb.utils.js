@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 function connect() {
-	// const uri = 'mongodb://localhost/project_beta_v6';
-	const uri = 'mongodb://libraryuser:librarypassword@ds229415.mlab.com:29415/wbs_library'
+	const uri = 'mongodb://localhost/project_beta_v6';
+	// const uri = 'mongodb://libraryuser:librarypassword@ds229415.mlab.com:29415/wbs_library'
 	mongoose.connect(uri, {useMongoClient:true});
 }
 

@@ -110,8 +110,6 @@ function recCounter(searchRes, allUserRes) {
 								}
 							});
 
-							//TBD: add weighted score
-
 							if(bool) {
 								recArray.push({
 									id: mediaObj.media,
