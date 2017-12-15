@@ -111,6 +111,17 @@ app.post('/rate', (req, res) => {
 
 app.get('/updateRecommendations', (req, res) => {
 	//TBD
+	//find each user
+	//run rec
+	//save
+
+	//find each media
+	//run rec
+	//save
+});
+
+app.get('/nuke', (req, res) => {
+	//delete BD contents
 });
 
 app.use(errMiddleware);
