@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const _ = require('lodash');
 
 const mongodb = require('./mongodb.utils');
 const errMiddleware = require('./err-middleware');
@@ -11,11 +12,9 @@ const ratingsService = require('./services/ratings.service');
 const mediaRecList = require('./services/mediaRecList.service');
 const userRecList = require('./services/userRecList.service');
 
-//for debugging
 const User = require('./models/user.model');
 const GlobalMedia = require('./models/globalMedia.model');
 const Media = require('./models/media.model');
-//for debugging
 
 const PORT = 3000;
 const app = express();
@@ -39,13 +38,15 @@ app.get('/media_list', (req, res) => {
 //for debugging
 
 app.get('/', (req, res) => {
-	mediaRecList.getMediaRec({title: 'Funny Movie'}).then((rec) => {
+	let name;
+	if(req.query.name) {
+		name = req.query.name;
+	} else {
+		name = 'John';
+	}
+	userRecList.getUserRec({username: name}).then((rec) => {
 		res.send(rec);
 	})
-
-	// userRecList.getUserRec({username: 'John'}).then((rec) => {
-	// 	res.send(rec);
-	// })
 });
 
 app.get('/user', (req, res) => {
@@ -110,14 +111,17 @@ app.post('/rate', (req, res) => {
 });
 
 app.get('/updateRecommendations', (req, res) => {
-	//TBD
-	//find each user
-	//run rec
-	//save
+	GlobalMedia.find({}).exec().then((result) => {
+		_.forEach(result, (media) => {
+			mediaRecList.getMediaRec(media).then((rec) => {
+				media.recommendations = rec;
+				media.recommendations = _.flatten(media.recommendations);
+				media.save();
+			});
+		})
 
-	//find each media
-	//run rec
-	//save
+		res.status(200).send('recommendations updated');
+	});
 });
 
 app.get('/nuke', (req, res) => {

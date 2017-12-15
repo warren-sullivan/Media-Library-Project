@@ -34,7 +34,9 @@ function rateMedia(user, media, rating) {
 		if(!gMedia) { throw new Error('invalid media'); }
 		if(!user) { throw new Error('invalid user'); }
 		if(!rating) { throw new Error('invalid rating'); }
-		//if rating is not int 1-5 throw error
+		if(rating != 1 && rating != 2 && rating != 3 && rating != 4 && rating != 5) {
+			throw new Error('rating must be a whole number 1-5');
+		}
 
 		_.forEach(user.mediaIndex, (userMedia) => {
 			if(userMedia.media.toString() == mediaID.toString()) {
